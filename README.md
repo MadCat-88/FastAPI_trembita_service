@@ -104,7 +104,7 @@ FastAPI_trembita_service/
 Налаштування підключення до сервісу за протоколом HTTPS наведено [в інструкції](./docs/https_nginx_reverse_proxy.md).
 
 ## Використання сервісу
-**Person Get All**
+#### **Person Get All**
 
 Повертає всі записи з БД.
 
