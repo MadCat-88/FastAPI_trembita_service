@@ -100,7 +100,7 @@ source venv/bin/activate
 pip install --upgrade pip
 pip install -r requirements.txt
 ```
-### 12. Виконати конфігурацію вебсервісу згідно [настанов з конфігурації](./docs/configuration.md)
+### 12. Виконати конфігурацію вебсервісу згідно [настанов з конфігурації](./configuration.md)
 
 ### 13. Створити структуру бази даних, для чого необхідно:
 
