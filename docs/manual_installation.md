@@ -145,3 +145,25 @@ sudo systemctl daemon-reload
 ```bash
 sudo systemctl enable fastapi_trembita_service
 ```
+
+##
+Матеріали створено за підтримки проєкту міжнародної технічної допомоги «Підтримка ЄС цифрової трансформації України (DT4UA)».
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
