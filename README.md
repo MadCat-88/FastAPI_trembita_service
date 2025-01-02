@@ -50,7 +50,7 @@ FastAPI_trembita_service/
 Сервіс можна інсталювати за допомогою скрипта автоматичного встановлення або вручну. Також сервіс може працювати в Docker 
 - [Інсталяція сервісу за допомогою скрипта автоматичного встановлення](./docs/script_installation.md).
 - [Інсталяція сервісу вручну](./docs/manual_installation.md).
-- [Конфігурація сервісу](./docs/manual_installation.md). исправить ссілку
+- [Конфігурація сервісу](./docs/configuration.md). 
 - [Pозгортання вебсервісу в Docker ](./docs/docker_installation.md).
 
 
