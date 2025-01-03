@@ -1,98 +1,84 @@
-# Налаштування Nginx як Reverse Proxy на Ubuntu з підтримкою HTTPS (самопідписаний сертифікат)
+## Конфігурація вебсервісу
 
-## Опис проєкту
-Цей проєкт спрямований на налаштування Nginx у режимі reverse proxy для перенаправлення запитів від клієнтів до REST сервісу.  
-Nginx буде виступати посередником між клієнтом і сервісом. Для захисту трафіку буде використаний самопідписаний SSL сертифікат.
+Конфігурація сервісу виконується у файлах «config.ini» та «alembic.ini».
 
-## Загальні передумови
-Перед налаштуванням Nginx, переконайтеся, що на сервері встановлені наступні компоненти:
-- Ubuntu (рекомендована версія 20.04 або вище)
-- Встановлений Nginx (версія 1.18 або вище)
-- Встановлений OpenSSL (для генерації SSL сертифікатів)
+У випадку, коли вебсервіс було встановлено за допомогою скрипта, виконувати додаткових налаштувань не потрібно.
 
-## Встановлення Nginx на Ubuntu
+У випадку, коли вебсервіс було встановлено вручну, необхідно відредагувати зазначені файли наступним чином:
 
-1. Оновіть список пакетів:
-    ```bash
-    sudo apt update
-    ```
-2. Встановіть Nginx:
-    ```bash
-    sudo apt install nginx
+1. У файлі `alembic.ini` необхідно відредагувати наступний рядок:
+  ```ini
+  sqlalchemy.url = mariadb+mariadbconnector://user:pass@localhost/dbname
+  ```
+де: 
+- user – логін користувача БД;
+- pass – пароль даного користувача;
+- dbname – назва БД.
+
+2. У файлі `config.ini` необхідно відредагувати секцію `[database]`, а саме наступні параметри:
+  ```ini
+  db_type = mysql
+  host = your_db_host
+  port = your_db_port
+  name = your_db_name
+  username = your_db_user
+  password = your_db_password
+  ```
+
+Значення конфігурованих параметрів для файлу `config.ini` наведено нижче:
+
+   ```ini
+   [database]
+   # Тип бази даних, яку ви використовуєте. Можливі значення: mysql або postgres
+   db_type = mysql
+   
+   # IP-адреса або доменне ім'я сервера бази даних
+   host = your_db_host
+   
+   # Порт, через який здійснюється підключення до бази даних. За замовчуванням для MySQL це 3306
+   port = your_db_port
+   
+   # Ім'я бази даних, до якої потрібно підключитися
+   name = your_db_name
+   
+   # Ім'я користувача для підключення до бази даних
+   username = your_db_user
+   
+   # Пароль користувача для підключення до бази даних
+   password = your_db_password
+   
+   [logging]
+   # Шлях до файлу, куди буде записуватися лог
+   filename = path/to/client.log
+   
+   # filemode визначає режим, в якому буде відкритий файл логування.
+   # 'a' - дописувати до існуючого файлу
+   # 'w' - перезаписувати файл кожен раз при старті програми
+   filemode = a
+   
+   # format визначає формат повідомлень логування.
+   # %(asctime)s - час створення запису
+   # %(name)s - ім'я логгера
+   # %(levelname)s - рівень логування
+   # %(message)s - текст повідомлення
+   # %(pathname)s - шлях до файлу, звідки було зроблено виклик
+   # %(lineno)d - номер рядка у файлі, звідки було зроблено виклик
+   format = %(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s
+   
+   # dateformat визначає формат дати в повідомленнях логування.
+   # Можливі формати можуть бути такими, як:
+   # %Y-%m-%d %H:%M:%S - 2023-06-25 14:45:00
+   # %d-%m-%Y %H:%M:%S - 25-06-2023 14:45:00
+   dateformat = %H:%M:%S
+   
+   # level визначає рівень логування. Найбільш детальний це DEBUG, за замовчуванням INFO
+   # DEBUG - докладна інформація, корисна для відлагодження роботи, логується вміст запитів та відповідей
+   # INFO - загальна інформація про стан виконання програми
+   # WARNING - попередження про можливі проблеми
+   # ERROR - помилки, які завадили нормальному виконанню
+   # CRITICAL - критичні помилки, що призводять до завершення програми
+   level = DEBUG
    ```
-   ## Налаштування Nginx як Reverse Proxy
-
-1. Перейдіть до директорії з конфігураціями:
-    ```bash
-    cd /etc/nginx/sites-available
-    ```
-
-2. Створіть новий файл конфігурації для REST сервісу. Наприклад, `rest_service`:
-    ```bash
-    sudo nano /etc/nginx/sites-available/rest_service
-    ```
-3. Додайте наступну конфігурацію для reverse proxy:
-    ```nginx
-    server {
-        listen 80;
-        server_name _;
-        
-        location / {
-            proxy_pass http://127.0.0.1:8000;
-            proxy_set_header Host $host;
-            proxy_set_header X-Real-IP $remote_addr;
-            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-            proxy_set_header X-Forwarded-Proto $scheme;
-        }
-    }
-
-    server {
-        listen 443 ssl;
-        server_name _;
-
-        ssl_certificate /etc/ssl/certs/nginx-selfsigned.crt;
-        ssl_certificate_key /etc/ssl/private/nginx-selfsigned.key;
-
-        location / {
-            proxy_pass http://127.0.0.1:8000;
-            proxy_set_header Host $host;
-            proxy_set_header X-Real-IP $remote_addr;
-            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-            proxy_set_header X-Forwarded-Proto $scheme;
-        }
-    }
-    ```
-4. Створіть символічне посилання на конфігурацію в папці `sites-enabled`:
-    ```bash
-    sudo ln -s /etc/nginx/sites-available/rest_service /etc/nginx/sites-enabled/
-    ```   
-
-5. Переконайтеся, що символічне посилання створено коректно:
-    ```bash
-    ls -l /etc/nginx/sites-enabled/
-    ```
-
-## Генерація самопідписаного SSL сертифіката
-
-Згенеруйте SSL сертифікат і приватний ключ:
-```bash
-    sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/ssl/private/nginx-selfsigned.key -out /etc/ssl/certs/nginx-selfsigned.crt
-```
-
-Під час генерації вам буде запропоновано ввести деякі дані (наприклад, країну, організацію, домен). Для тестових цілей можете ввести будь-які значення.
-
-## Перевірка конфігурації
-Щоб переконатися, що конфігурація Nginx правильна, виконайте команду:
- ```bash
-sudo nginx -t
- ```
-Якщо конфігурація правильна, ви побачите повідомлення `syntax is ok та test is successful`.
-
-## Перезапуск Nginx
-
-Після внесення змін перезапустіть Nginx:
-```bash
-sudo systemctl restart nginx
-
 ##
 Матеріали створено за підтримки проєкту міжнародної технічної допомоги «Підтримка ЄС цифрової трансформації України (DT4UA)».
+
