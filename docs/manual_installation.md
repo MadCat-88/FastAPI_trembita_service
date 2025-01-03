@@ -11,6 +11,7 @@
 sudo apt-get update
 sudo apt-get install -y curl libmariadb-dev gcc python3 python3-venv python3-dev git
 ```
+
 **Важливо** Якщо версія Python нижче 3.10, сервіс працювати не буде.
 
 ### 2. Додати репозиторій MariaDB:
